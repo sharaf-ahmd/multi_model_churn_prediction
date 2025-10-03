@@ -22,8 +22,6 @@ def load_pipeline(model_file, preprocessor_file):
 # File paths (adjust if needed)
 pipelines = {
     "Logistic Regression": load_pipeline("log_model.pkl", "preprocessor.pkl"),
-    "Random Forest": load_pipeline("rf_model.pkl", "preprocessor.pkl"),
-    "SVM": load_pipeline("svc_model.pkl", "preprocessor.pkl"),
     "KNN": load_pipeline("knn_model.pkl", "preprocessor.pkl"),
     "Naive Bayes": load_pipeline("gnb_model.pkl", "preprocessor.pkl"),
 }
@@ -92,3 +90,4 @@ if st.button("Predict"):
             st.write("Confidence:", f"{max(proba)*100:.2f}%")
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
