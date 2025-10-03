@@ -7,8 +7,6 @@ import joblib
 # --------------------------
 @st.cache_resource
 def load_models():
-    # Corrected to load only the models that were actually saved in the notebook.
-    # 'svc_model.pkl' was never created, so it's removed.
     models = {
         "Logistic Regression": joblib.load("log_model.pkl"),
         "KNN": joblib.load("knn_model.pkl"),
@@ -32,7 +30,7 @@ model_choice = st.sidebar.selectbox("Select a model:", list(models.keys()))
 # --------------------------
 st.header("Enter Customer Information")
 
-# Create columns for a better layout
+
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -60,8 +58,7 @@ with col3:
 # Prediction Logic
 # --------------------------
 if st.button("Predict Churn"):
-    # The saved pipeline expects a DataFrame that has been manually encoded first, 
-    # and then it applies a StandardScaler. We must replicate the manual steps exactly.
+  
 
     # 1. Create a dictionary with all possible feature columns, initialized to 0 or False
     input_data = {
@@ -131,3 +128,4 @@ if st.button("Predict Churn"):
     if proba is not None:
         confidence = max(proba) * 100
         st.metric(label="Prediction Confidence", value=f"{confidence:.2f}%")
+
