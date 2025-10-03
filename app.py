@@ -15,11 +15,10 @@ def load_models_and_preprocessor():
     }
     preprocessor = joblib.load("preprocessor.pkl")
     
-    # Load expected categorical levels to fix missing column issues
-    ohe_features = joblib.load("ohe_features.pkl")  # Save this during training
-    return models, preprocessor, ohe_features
 
-models, preprocessor, ohe_features = load_models_and_preprocessor()
+    return models, preprocessor
+
+models, preprocessor = load_models_and_preprocessor()
 
 # --------------------------
 # Streamlit App
@@ -89,4 +88,5 @@ if st.button("Predict"):
             st.write("Confidence:", f"{max(proba)*100:.2f}%")
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
 
