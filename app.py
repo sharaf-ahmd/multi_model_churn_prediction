@@ -9,7 +9,7 @@ import joblib
 def load_models():
     models = {
         "Logistic Regression": joblib.load("log_model.pkl"),
-        "Random Forest": joblib.load("rf_model.pkl"),
+        "KNN": joblib.load("knn_model.pkl"),
         "Naive Bayes": joblib.load("gnb_model.pkl"),
     }
     return models
