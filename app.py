@@ -3,19 +3,24 @@ import pandas as pd
 import joblib
 
 # --------------------------
-# Load Saved Models
+# Load Saved Models & Preprocessor
 # --------------------------
 @st.cache_resource
 def load_models():
     models = {
         "Logistic Regression": joblib.load("log_model.pkl"),
-        "SVM": joblib.load("svc_model.pkl"),
         "KNN": joblib.load("knn_model.pkl"),
         "Naive Bayes": joblib.load("gnb_model.pkl"),
     }
     return models
 
+@st.cache_resource
+def load_preprocessor():
+    preprocessor = joblib.load("preprocessor.pkl")
+    return preprocessor
+
 models = load_models()
+preprocessor = load_preprocessor()
 
 # --------------------------
 # Streamlit App
@@ -37,34 +42,21 @@ purchase_year = st.number_input("Purchase Year", min_value=2000, max_value=2025,
 purchase_month = st.number_input("Purchase Month", min_value=1, max_value=12, value=5)
 purchase_day = st.number_input("Purchase Day", min_value=1, max_value=31, value=1)
 
-# Product Category
-product_category = st.selectbox("Product Category", ["Books", "Clothing", "Electronics"])
-
-# Payment Method
-payment_method = st.selectbox("Payment Method", ["Credit Card", "PayPal", "Other"])
-
-# Age Group
+product_category = st.selectbox("Product Category", ["Books", "Clothing", "Electronics", "Home"])
+payment_method = st.selectbox("Payment Method", ["Credit Card", "PayPal", "Cash", "Other"])
 age_group = st.selectbox("Age Group", ["0-19", "20-29", "30-39", "40-49", "50-59", "60+"])
 
-# Scaled features
 total_purchase = st.number_input("Total Purchase Amount (scaled)", value=0.5)
 product_price = st.number_input("Product Price (scaled)", value=0.5)
 
 # --------------------------
 # Build Input Data
 # --------------------------
-columns = [
-    "Quantity", "Returns", "Gender",
-    "purchase_year", "purchase_month", "purchase_day",
-    "Product Category_Books", "Product Category_Clothing", "Product Category_Electronics",
-    "Payment Method_Credit Card", "Payment Method_PayPal",
-    "0-19", "20-29", "30-39", "40-49", "50-59", "60+",
-    "Total Purchase Amount_scaled", "Product Price_scaled"
-]
+# Start with all columns expected by the preprocessor
+all_columns = preprocessor.feature_names_in_  # fetch expected columns from preprocessor
+input_dict = {col: 0 for col in all_columns}
 
-input_dict = {col: 0 for col in columns}
-
-# Fill numeric
+# Fill numeric features
 input_dict["Quantity"] = quantity
 input_dict["Returns"] = returns
 input_dict["Gender"] = 1 if gender == "Male" else 0
@@ -74,18 +66,17 @@ input_dict["purchase_day"] = purchase_day
 input_dict["Total Purchase Amount_scaled"] = total_purchase
 input_dict["Product Price_scaled"] = product_price
 
-# One-hot product category
-if f"Product Category_{product_category}" in input_dict:
-    input_dict[f"Product Category_{product_category}"] = 1
+# One-hot encode product category
+cat_col = f"Product Category_{product_category}"
+if cat_col in input_dict:
+    input_dict[cat_col] = 1
 
-# One-hot payment method
-if payment_method == "Credit Card":
-    input_dict["Payment Method_Credit Card"] = 1
-elif payment_method == "PayPal":
-    input_dict["Payment Method_PayPal"] = 1
-# If "Other", all remain 0
+# One-hot encode payment method
+pay_col = f"Payment Method_{payment_method}"
+if pay_col in input_dict:
+    input_dict[pay_col] = 1
 
-# One-hot age group
+# One-hot encode age group
 if age_group in input_dict:
     input_dict[age_group] = 1
 
@@ -97,8 +88,16 @@ input_df = pd.DataFrame([input_dict])
 # --------------------------
 if st.button("Predict"):
     model = models[model_choice]
-    prediction = model.predict(input_df)[0]
-    proba = model.predict_proba(input_df)[0] if hasattr(model, "predict_proba") else None
+
+    # Apply preprocessor first if using pipeline-less model
+    try:
+        X_processed = preprocessor.transform(input_df)
+    except Exception as e:
+        st.error(f"Error in preprocessing: {e}")
+        st.stop()
+
+    prediction = model.predict(X_processed)[0]
+    proba = model.predict_proba(X_processed)[0] if hasattr(model, "predict_proba") else None
 
     if prediction == 1:
         st.error("⚠️ Customer is likely to CHURN!")
