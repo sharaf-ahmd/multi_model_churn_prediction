@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -10,7 +9,6 @@ import joblib
 def load_models():
     models = {
         "Logistic Regression": joblib.load("log_model.pkl"),
-        "Random Forest": joblib.load("rf_model.pkl"),
         "SVM": joblib.load("svc_model.pkl"),
         "KNN": joblib.load("knn_model.pkl"),
         "Naive Bayes": joblib.load("gnb_model.pkl"),
@@ -48,14 +46,13 @@ payment_method = st.selectbox("Payment Method", ["Credit Card", "PayPal", "Other
 # Age Group
 age_group = st.selectbox("Age Group", ["0-19", "20-29", "30-39", "40-49", "50-59", "60+"])
 
-# Scaled features (let user enter raw, assume already scaled, or normalize later)
+# Scaled features
 total_purchase = st.number_input("Total Purchase Amount (scaled)", value=0.5)
 product_price = st.number_input("Product Price (scaled)", value=0.5)
 
 # --------------------------
 # Build Input Data
 # --------------------------
-# Initialize all columns as 0/False
 columns = [
     "Quantity", "Returns", "Gender",
     "purchase_year", "purchase_month", "purchase_day",
