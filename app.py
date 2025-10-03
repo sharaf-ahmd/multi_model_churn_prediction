@@ -89,3 +89,4 @@ if st.button("Predict"):
             st.write("Confidence:", f"{max(proba)*100:.2f}%")
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
