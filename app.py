@@ -62,12 +62,7 @@ input_dict = {
 
 input_df = pd.DataFrame([input_dict])
 
-# --------------------------
-# Ensure all expected OHE columns exist
-# --------------------------
-for col in ohe_features:
-    if col not in input_df.columns:
-        input_df[col] = 0  # default value if missing
+
 
 # --------------------------
 # Prediction
@@ -88,5 +83,6 @@ if st.button("Predict"):
             st.write("Confidence:", f"{max(proba)*100:.2f}%")
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
 
 
